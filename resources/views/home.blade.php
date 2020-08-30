@@ -64,6 +64,7 @@
     </style>
 </head>
 <body>
+
 <div class="flex-center position-ref full-height">
     @if (Route::has('login'))
         <div class="top-right links">
@@ -85,12 +86,13 @@
                 @endif
             @endauth
         </div>
-    @endif
+    @endifł
 
     <div class="content">
         <span style="font-weight: bold;">HOME</span><br>
         <span style="font-weight: bold;">Üdvözlünk {{ Auth::user()->name }}!</span>
     </div>
 </div>
+
 </body>
 </html>
