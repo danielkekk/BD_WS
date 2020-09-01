@@ -55,19 +55,21 @@ class ProductController extends Controller
     {
         $messages = [
             'required' => 'A :attribute mező kitöltése kötelező.',
-            'max:20' => 'A hossz csak 20 lehet.',
+            'max' => 'A hossz csak 20 karakter lehet.',
             'integer' => 'Csak számok.',
+            'between' => '1-1000 között',
         ];
 
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:20',
             'code' => 'required|string|max:20',
-            'qty' => 'required|integer',
+            'qty' => 'required|integer|between:1,1000',
         ], $messages);
 
         if ($validator->fails()) {
             return redirect('products')
                 ->withErrors($validator)
+
                 ->withInput();
         }
 
@@ -77,6 +79,13 @@ class ProductController extends Controller
         $product->qty = $request->qty;
         $product->save();
 
+
+        return redirect()->route('products');
+    }
+
+    public function delete($id)
+    {
+        $product = Product::where('id', $id)->delete();
 
         return redirect()->route('products');
     }

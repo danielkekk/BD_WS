@@ -100,8 +100,10 @@
 
             echo '<br><br>';
 
+            $i=1;
             foreach($products as $product) {
-                echo $product->toString() . '<br>';
+                echo $i . ". ".$product->toString() . "&nbsp;&nbsp;<a href=\"deleteproduct/".$product->id."\">Töröl</a><br>";
+                $i++;
             }
         ?>
 
