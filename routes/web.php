@@ -24,3 +24,5 @@ Route::get('/home', 'HomeController@index')->name('home')->middleware('auth');
 Route::get('/products', 'ProductController@index')->name('products')->middleware('product');
 Route::post('/product', 'ProductController@create')->name('product')->middleware('product');
 Route::get('/deleteproduct/{id}', 'ProductController@delete')->name('deleteproduct')->middleware('product');
+
+Route::get('/categories', 'CategoriesController@index')->name('categories')->middleware('auth');
