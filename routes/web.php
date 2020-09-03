@@ -26,3 +26,12 @@ Route::post('/product', 'ProductController@create')->name('product')->middleware
 Route::get('/deleteproduct/{id}', 'ProductController@delete')->name('deleteproduct')->middleware('product');
 
 Route::get('/categories', 'CategoriesController@index')->name('categories')->middleware('auth');
+Route::get('/leafcategories', 'CategoriesController@getLeafCategories')->name('leafcategories')->middleware('auth');
+Route::get('/singlepath/{node}', 'CategoriesController@getSinglePath')->where('node', '[A-Z]+')->name('singlepath')->middleware('auth');
+Route::get('/depthofnodes', 'CategoriesController@getDepthOfNodes')->name('depthofnodes')->middleware('auth');
+Route::get('/depthofsubtree/{node}', 'CategoriesController@getDepthOfSubtree')->where('node', '[A-Z]+')->name('depthofsubtree')->middleware('auth');
+Route::get('/subordinatesofanode/{node}', 'CategoriesController@getSubordinates')->where('node', '[A-Z]+')->name('subordinatesofanode')->middleware('auth');
+Route::get('/addnewnode/{node}/{newnode}', 'CategoriesController@addNewNode')->name('addnewnode')->middleware('auth');
+Route::get('/addnewnodeaschildofnode/{node}/{newnode}', 'CategoriesController@addNewNodeASChildOfNode')->name('addnewnodeaschildofnode')->middleware('auth');
+Route::get('/deleteLeafNode/{node}', 'CategoriesController@deleteLeafNode')->name('deleteLeafNode')->middleware('auth');
+Route::get('/deleteParentNode/{node}', 'CategoriesController@deleteParentNode')->name('deleteParentNode')->middleware('auth');
