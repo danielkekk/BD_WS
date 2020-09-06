@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class CategoriesController extends Controller
 {
@@ -24,14 +25,21 @@ class CategoriesController extends Controller
      */
     public function index()
     {
-        $categories = DB::select("SELECT node.name
+        $categories = DB::select("SELECT node.id, node.name
                                         FROM categories AS node,
                                         categories AS parent
                                         WHERE node.lft BETWEEN parent.lft AND parent.rgt
                                         AND parent.name = 'ELECTRONICS'
                                         ORDER BY node.lft;", []);
 
-        return view('categories', ['categories' => $categories]);
+        $categoriesWithDepth = DB::select("SELECT node.id, node.name, (COUNT(parent.name) - 1) AS depth
+                                        FROM categories AS node,
+                                                categories AS parent
+                                        WHERE node.lft BETWEEN parent.lft AND parent.rgt
+                                        GROUP BY node.id, node.name
+                                        ORDER BY node.lft;", []);
+
+        return view('categories', ['categories' => $categories, 'categoriesWithDepth' => $categoriesWithDepth]);
     }
 
     /**
@@ -284,4 +292,142 @@ UNLOCK TABLES;
 
         return redirect()->route('categories');
     }
+
+    public function categoryTree()
+    {
+        //el kell dönteni h a parentnek vannak gyerekei v nincsenek
+        //lekérjük a nodeokat a mélységükkel
+        $categoriesWithDepth = DB::select("SELECT node.name, (COUNT(parent.name) - 1) AS depth
+                                        FROM categories AS node,
+                                                categories AS parent
+                                        WHERE node.lft BETWEEN parent.lft AND parent.rgt
+                                        GROUP BY node.name
+                                        ORDER BY node.lft;", []);
+
+        return view('editcategories', ['categories' => $categoriesWithDepth]);
+    }
+
+    public function createNewNode(Request $request)
+    {
+        $isLeaf = false;
+        $leafcategories = DB::select("SELECT id, name
+                                            FROM categories
+                                            WHERE rgt = lft + 1;", []);
+
+        foreach($leafcategories as $cat) {
+            if((int)$cat->id == (int)$request['parentcategories']) {
+                $isLeaf = true;
+                break;
+            }
+        }
+
+        if($isLeaf === true) {
+            //ha levél akkor beteszük mintha nem lenne létező gyereke
+            $lft = (array)DB::selectOne("SELECT lft
+                                        FROM categories
+                                        WHERE id = :node;", ['node' => (int)$request['parentcategories']]);
+
+            $updated = DB::update("UPDATE categories SET rgt = rgt + 2 WHERE rgt > :myLeft;", ['myLeft' => $lft['lft']]);
+            $updated1 = DB::update("UPDATE categories SET lft = lft + 2 WHERE lft > :myLeft;", ['myLeft' => $lft['lft']]);
+
+            $inserted = DB::insert('INSERT INTO categories(name, lft, rgt) VALUES(:newnode, :myLeftplusone, :myLeftplustwo);',
+                ['newnode' => trim($request['name']),
+                    'myLeftplusone' => ((int)$lft['lft']+1),
+                    'myLeftplustwo' => ((int)$lft['lft']+2)]);
+
+        } else {
+            //megnézni az összes mélységét
+            $depthofcategories = DB::select("SELECT node.id, node.name, (COUNT(parent.name) - 1) AS depth
+                                        FROM categories AS node,
+                                                categories AS parent
+                                        WHERE node.lft BETWEEN parent.lft AND parent.rgt
+                                        GROUP BY node.name, node.id
+                                        ORDER BY node.lft;", []);
+
+            //kiekeressük a parent+1 mélységűt lft szerint sorba van rendezve,
+            $parent = null;
+            foreach($depthofcategories as $cat) {
+                if((int)$cat->id == (int)$request['parentcategories']) {
+                    $parent = $cat;
+                    break;
+                }
+            }
+
+            //a parentnél egyel nagyobb méylségű kell abból a legkisebb azonosítójút oda kell beszúrni elé
+            $firstChildOfParent = null;
+            foreach($depthofcategories as $cat) {
+                if((int)$cat->depth == (int)$parent->depth+1) {
+                    $firstChildOfParent = $cat;
+                    break;
+                }
+            }
+
+            $lft = (array)DB::selectOne("SELECT lft
+                                        FROM categories
+                                        WHERE id = :node;", ['node' => (int)$parent->id]);
+
+            $updated = DB::update("UPDATE categories SET rgt = rgt + 2 WHERE rgt > :myLeft;", ['myLeft' => $lft['lft']]);
+            $updated1 = DB::update("UPDATE categories SET lft = lft + 2 WHERE lft > :myLeft;", ['myLeft' => $lft['lft']]);
+
+            $inserted = DB::insert('INSERT INTO categories(name, lft, rgt) VALUES(:newnode, :myLeftplusone, :myLeftplustwo);',
+                ['newnode' => trim($request['name']),
+                    'myLeftplusone' => ((int)$lft['lft']+1),
+                    'myLeftplustwo' => ((int)$lft['lft']+2)]);
+
+        }
+
+        return redirect()->route('categories');
+
+        //el kell dönteni h a parentnek vannak gyerekei v nincsenek
+        //eszerint lefuttatni a megfelelő addnode algoritmust
+
+        //lekérjük az összes leafnodeot ha benne van nincsenek gyerekei
+    }
+
+    public function removeNode($nodeid)
+    {
+        //megnézni h vannak-e gyerekei v nincsenek
+        //ha vannak gyerekei csak parentes algoritmus
+        //ha nincsenek a sima leaf nodeot törlő
+        $deletedNodeId = (int)$nodeid;
+        $isLeaf = false;
+        $leafcategories = DB::select("SELECT id, name
+                                            FROM categories
+                                            WHERE rgt = lft + 1;", []);
+
+        foreach($leafcategories as $cat) {
+            if((int)$cat->id == (int)$deletedNodeId) {
+                $isLeaf = true;
+                break;
+            }
+        }
+
+        if($isLeaf === true) {
+            $deleteProp = (array)DB::selectOne("SELECT lft, rgt, (rgt - lft + 1) as width
+                                            FROM categories
+                                            WHERE id = :node;", ['node' => $deletedNodeId]);
+
+            $deleted = DB::delete('DELETE FROM categories WHERE lft BETWEEN :myLeft AND :myRight;',['myLeft' => $deleteProp['lft'],
+                'myRight' => $deleteProp['rgt']]);
+
+            $updated = DB::update("UPDATE categories SET rgt = rgt - :myWidth WHERE rgt > :myRight;", ['myWidth' => $deleteProp['width'],
+                'myRight' => $deleteProp['rgt']]);
+            $updated1 = DB::update("UPDATE categories SET lft = lft - :myWidth WHERE lft > :myRight;", ['myWidth' => $deleteProp['width'],
+                'myRight' => $deleteProp['rgt']]);
+        } else {
+            $deleteProp = (array)DB::selectOne("SELECT lft, rgt, (rgt - lft + 1) as width
+                                            FROM categories
+                                            WHERE id = :node;", ['node' => $deletedNodeId]);
+
+            $deleted = DB::delete('DELETE FROM categories WHERE lft = :myLeft;',['myLeft' => $deleteProp['lft']]);
+
+            $updated = DB::update("UPDATE categories SET rgt = rgt - 1, lft = lft - 1 WHERE lft BETWEEN :myLeft AND :myRight;", ['myLeft' => $deleteProp['lft'],
+                'myRight' => $deleteProp['rgt']]);
+            $updated1 = DB::update("UPDATE categories SET rgt = rgt - 2 WHERE rgt > :myRight;", ['myRight' => $deleteProp['rgt']]);
+            $updated2 = DB::update("UPDATE categories SET lft = lft - 2 WHERE lft > :myRight;", ['myRight' => $deleteProp['rgt']]);
+        }
+
+        return redirect()->route('categories');
+    }
+
 }

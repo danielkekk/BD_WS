@@ -98,29 +98,26 @@
                     echo '<span style="color: red; font-weight: bold;">' . $message . '</span><br>';
                 }
             }
+
             echo '<br><br>';
 
-            foreach($categoriesWithDepth as $cat) {
+            foreach($categories as $cat) {
+
                 $category = (array)$cat;
                 for($i=0; $i<(int)$category['depth']; $i++) {
                     echo '&nbsp;&nbsp;';
                 }
-                echo $category['name'] . '&nbsp;&nbsp;<a href="'.url('/removenode/'.$cat->id).'">X</a><br>';
+                echo $category['name'] . "<br>";
             }
         ?>
 
         <br>
 
-        <form id="create-product-form" action="{{ route('createnewnode') }}" method="POST">
+        <form id="create-product-form" action="{{ route('product') }}" method="POST">
             @csrf
-
-            <select id="parentcategories" name="parentcategories">
-                <?php foreach($categories as $category) { ?>
-                    <option value="<?php echo $category->id; ?>"><?php echo $category->name; ?></option>
-                <?php } ?>
-            </select><br>
-
             <input id="name" type="text" name="name" value="" placeholder="name" required><br>
+            <input id="code" type="text" name="code" value="" placeholder="code"><br>
+            <input id="qty" type="number" step="1" name="qty" value="" placeholder="qty" required><br>
 
             <input id="submit" type="submit" name="submit" value="Mentés">
         </form>
