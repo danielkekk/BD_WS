@@ -114,15 +114,17 @@
         <form id="create-product-form" action="{{ route('createnewnode') }}" method="POST">
             @csrf
 
-            <select id="parentcategories" name="parentcategories">
+            <label id="parent">Parent</label>
+            <select for="parent" id="parentcategories" name="parentcategories" >
                 <?php foreach($categories as $category) { ?>
                     <option value="<?php echo $category->id; ?>"><?php echo $category->name; ?></option>
                 <?php } ?>
             </select><br>
 
-            <input id="name" type="text" name="name" value="" placeholder="name" required><br>
+            <label id="name">Name</label>
+            <input for="name" id="name" type="text" name="name" value="" placeholder="name" required><br>
 
-            <input id="submit" type="submit" name="submit" value="Mentés">
+            <input id="submit" type="submit" name="submit" value="Hozzáadás">
         </form>
     </div>
 </div>
