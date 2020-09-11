@@ -15,8 +15,12 @@ class CreateAttributesValuesTable extends Migration
     {
         Schema::create('attributes_values', function (Blueprint $table) {
             $table->id();
+            $table->bigInteger('categories_id');
             $table->bigInteger('attributes_id');
-            $table->string('value',255);
+            $table->string('value',255)->nullable(true);
+            $table->integer('min')->nullable(true);
+            $table->integer('max')->nullable(true);
+            $table->integer('step')->nullable(true);
             $table->timestamps();
         });
     }

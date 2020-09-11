@@ -17,6 +17,7 @@ class CreateAttributesTable extends Migration
             $table->id();
             $table->string('web_name', 100);
             $table->string('name', 100);
+            $table->string('azon')->nullable(true);
             $table->string('type_id');
             $table->timestamps();
         });

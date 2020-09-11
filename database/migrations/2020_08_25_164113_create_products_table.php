@@ -15,11 +15,12 @@ class CreateProductsTable extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->integer('categories_id')->unsigned()->nullable(true);
+            $table->integer('category_id')->unsigned()->nullable(true);
             $table->string('category_azon');
             $table->string('name');
             $table->string('code');
             $table->integer('qty');
+            $table->boolean('active');
             $table->timestamps();
         });
     }

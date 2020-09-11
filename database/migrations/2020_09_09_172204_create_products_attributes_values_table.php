@@ -17,8 +17,9 @@ class CreateProductsAttributesValuesTable extends Migration
             $table->id();
             $table->bigInteger('products_id');
             $table->bigInteger('attributes_id');
-            $table->bigInteger('saved_value');
-            $table->string('value',255);
+            $table->bigInteger('attributes_values_id')->nullable(true);
+            $table->bigInteger('saved_value')->nullable(true);
+            $table->string('value',255)->nullable(true);
             $table->timestamps();
         });
     }
