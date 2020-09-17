@@ -39,3 +39,6 @@ Route::get('/deleteParentNode/{node}', 'CategoriesController@deleteParentNode')-
 
 Route::post('/createnewnode', 'CategoriesController@createNewNode')->name('createnewnode')->middleware('auth');
 Route::get('/removenode/{nodeid}', 'CategoriesController@removeNode')->name('removenode')->middleware('auth');
+
+Route::get('/termekek', 'CategoriesController@productsBrowser')->name('termekek')->middleware('auth');
+Route::get('/termekek/{catid}', 'CategoriesController@getTermekek')->middleware('auth');

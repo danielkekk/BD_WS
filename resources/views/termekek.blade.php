@@ -105,27 +105,62 @@
                 for($i=0; $i<(int)$category['depth']; $i++) {
                     echo '&nbsp;&nbsp;';
                 }
-                echo $category['name'] . '&nbsp;&nbsp;<a href="'.url('/removenode/'.$cat->id).'">X</a><br>';
+                echo '<a href="'.url('/termekek/'.$cat->id).'">'.$category['name'].'</a><br>';
+            }
+
+        echo '<br><br><br>';
+
+
+
+            echo '<form id="filter-form" action="" method="GET">';?>
+        @csrf
+        <?php
+        foreach($filters as $filter) {
+            echo $filter['web_name'] . '<br>';
+            if($filter['type'] == 'select') {
+                echo '<select id="'.$filter['azon'].'" name="'.$filter['azon'].'">';
+                foreach($filter['values'] as $key => $val) {
+                    echo '<option value="attr_'.$key.'">'.$val.'</option>';
+                }
+                echo '</select>';
+            } else if($filter['type'] == 'number') {
+                echo '<input type="number" id="'.$filter['azon'].'" name="'.$filter['azon'].'" value="10"/>';
+            }
+            echo '<br>';
+        }
+
+        echo '<input type="submit" value="Szűrés"/>';
+        echo '</form>';
+
+            echo '<br><br><br>';
+
+            if(!empty($termekek)) {
+
+                $currentproduct = 0;//(int)$termekek[0]->productid;
+               // echo $termekek[0]->productid;; exit;
+                foreach($termekek as $t) {
+                    $termek = (array)$t;
+
+                    if((int)$currentproduct != (int)$termek['productid']) {
+                        $currentproduct = (int)$termek['productid'];
+                        echo $termek['name']." qty:" . $termek['qty'] . "<br>";
+
+                        foreach($termekek as $a) {
+                            $attr = (array)$a;
+                            if($attr['productid'] == $termek['productid']) {
+                                $value = (isset($attr['pavvalue'])) ? $attr['pavvalue'] : $attr['avvalue'];
+                                echo "&nbsp;&nbsp;&nbsp;" . $attr['attrname'] . ": " . $value . "<br>";
+                            }
+                        }
+
+                        echo "<br>";
+
+                    }
+                }
+
             }
         ?>
 
-        <br>
-
-        <form id="create-product-form" action="{{ route('createnewnode') }}" method="POST">
-            @csrf
-
-            <label id="parent">Parent</label>
-            <select for="parent" id="parentcategories" name="parentcategories" >
-                <?php foreach($categories as $category) { ?>
-                    <option value="<?php echo $category->id; ?>"><?php echo $category->name; ?></option>
-                <?php } ?>
-            </select><br>
-
-            <label id="name">Name</label>
-            <input for="name" id="name" type="text" name="name" value="" placeholder="name" required><br>
-
-            <input id="submit" type="submit" name="submit" value="Hozzáadás">
-        </form>
     </div>
 </div>
 </body>

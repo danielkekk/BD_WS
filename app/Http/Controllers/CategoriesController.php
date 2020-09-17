@@ -430,4 +430,137 @@ UNLOCK TABLES;
         return redirect()->route('categories');
     }
 
+
+    /**
+     * Show the application dashboard.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function productsBrowser()
+    {
+        $categories = DB::select("SELECT node.id, node.name
+                                        FROM categories AS node,
+                                        categories AS parent
+                                        WHERE node.lft BETWEEN parent.lft AND parent.rgt
+                                        AND parent.name = 'ELECTRONICS'
+                                        ORDER BY node.lft;", []);
+
+        $categoriesWithDepth = DB::select("SELECT node.id, node.name, (COUNT(parent.name) - 1) AS depth
+                                        FROM categories AS node,
+                                                categories AS parent
+                                        WHERE node.lft BETWEEN parent.lft AND parent.rgt
+                                        GROUP BY node.id, node.name
+                                        ORDER BY node.lft;", []);
+
+        return view('termekek', ['categories' => $categories, 'categoriesWithDepth' => $categoriesWithDepth]);
+    }
+
+    public function getTermekek($catid)
+    {
+        $categoriesWithDepth = DB::select("SELECT node.id, node.name, (COUNT(parent.name) - 1) AS depth
+                                        FROM categories AS node,
+                                                categories AS parent
+                                        WHERE node.lft BETWEEN parent.lft AND parent.rgt
+                                        GROUP BY node.id, node.name
+                                        ORDER BY node.lft;", []);
+
+
+        //lekérdezzük a catid alapján h levél-e v vannak-e gyerekei.
+        $nodeId = (int)$catid;
+        $isLeaf = false;
+        $leafcategories = DB::select("SELECT id, name
+                                            FROM categories
+                                            WHERE rgt = lft + 1;", []);
+
+        foreach($leafcategories as $cat) {
+            if((int)$cat->id == (int)$nodeId) {
+                $isLeaf = true;
+                break;
+            }
+        }
+
+        if($isLeaf) {
+            //ha levél akkor kilistázzuk a catidhoz tartozó termékeket attribútumokat stb.
+            $childs = [$catid];
+            $sql = "SELECT pr.id AS productid,pr.category_id,pr.name,pr.qty,pav.id,pav.products_id,pav.attributes_id,pav.attributes_values_id,pav.value AS pavvalue, attr.id,attr.web_name AS attrname, av.id,av.value AS avvalue 
+                    FROM products AS pr LEFT JOIN products_attributes_values AS pav ON pav.products_id=pr.id 
+                    LEFT JOIN attributes AS attr ON attr.id=pav.attributes_id 
+                    LEFT JOIN attributes_values AS av ON av.id=pav.attributes_values_id 
+                    WHERE category_id IN (".implode(',', $childs).") ORDER BY pr.id ASC;";
+            $termekek = DB::select(DB::raw($sql), []);
+        } else {
+            //ha nem levél akkor a catid és összes gyerek catidhoz tartozó termékek attribútumok kilistázása...
+            $childCategories = DB::select("SELECT node.id, node.name, node.azon
+                                        FROM categories AS node,
+                                        categories AS parent
+                                        WHERE node.lft BETWEEN parent.lft AND parent.rgt
+                                        AND parent.id = :catid
+                                        ORDER BY node.lft;", ['catid' => $catid]);
+
+            $childs = [];
+            foreach($childCategories as $child) {
+                $childs[] = (int)$child->id;
+            }
+
+            $sql = "SELECT pr.id AS productid,pr.category_id,pr.name,pr.qty,pav.id,pav.products_id,pav.attributes_id,pav.attributes_values_id,pav.value AS pavvalue, attr.id,attr.web_name AS attrname, av.id,av.value AS avvalue 
+                    FROM products AS pr LEFT JOIN products_attributes_values AS pav ON pav.products_id=pr.id 
+                    LEFT JOIN attributes AS attr ON attr.id=pav.attributes_id 
+                    LEFT JOIN attributes_values AS av ON av.id=pav.attributes_values_id 
+                    WHERE category_id IN (".implode(',', $childs).") ORDER BY pr.id ASC";
+            $termekek = DB::select(DB::raw($sql), []);
+            //print_r($termekek); exit;
+            //echo implode(",", $childs); exit;
+        }
+
+
+        /*TODO
+        SELECT pr.id AS productid,attr.web_name,pr.category_id,pr.name,pr.qty,pav.id,pav.products_id,pav.attributes_id,
+        pav.attributes_values_id,pav.value AS pavvalue, attr.id,attr.web_name AS attrname, attr.azon AS attrazon, av.id,
+        av.value AS avvalue FROM products AS pr LEFT JOIN products_attributes_values AS pav ON pav.products_id=pr.id
+        LEFT JOIN attributes AS attr ON attr.id=pav.attributes_id LEFT JOIN attributes_values AS av ON av.id=pav.attributes_values_id
+        WHERE category_id IN (3) AND ((av.value='Botanic') AND (pav.value>1 AND pav.value<78)) ORDER BY pr.id ASC
+        */
+
+        //TODO lekérdezni a kategóriához tartozó szűrőket, attribútumokat
+        //TODO lekérdezni minden termékhez a hozzá tartozó szűrőit és azok értékeit
+        /*Adott kategóriához az összes szűrő
+         * SELECT av.categories_id,av.attributes_id,a.web_name,a.azon,av.value,av.min,av.max,av.step
+        FROM attributes_values AS av LEFT JOIN attributes AS a ON a.id=av.attributes_id WHERE av.categories_id IN (3)
+         */
+        $sql = "SELECT av.id AS avid,av.categories_id,av.attributes_id,a.web_name,a.type_id,a.azon,av.value,av.min,av.max,av.step 
+                FROM attributes_values AS av LEFT JOIN attributes AS a ON a.id=av.attributes_id WHERE av.categories_id IN (3) 
+                ORDER BY av.attributes_id ASC;";
+        $filters = DB::select(DB::raw($sql), []);
+
+        $azon = '';
+        $szurok = [];
+        $arrindex = -1;
+        foreach($filters as $a) {
+            $filter = (array)$a;
+
+            if($azon != $filter['azon']) {
+                $azon = $filter['azon'];
+                ++$arrindex;
+                $szurok[] = [
+                    'web_name' => $filter['web_name'],
+                    'type' => $filter['type_id'],
+                    'azon' => $filter['azon'],
+                    'values' => [
+                        ''.$filter['avid'] => $filter['value']
+                    ],
+                    'min' => $filter['min'],
+                    'max' => $filter['max'],
+                    'step' => $filter['step'],
+                ];
+            } else {
+                $szurok[$arrindex]['values'][(string)$filter['avid']] = $filter['value'];
+            }
+        }
+
+        //echo implode(",", $childs); exit;
+        return view('termekek', ['categoriesWithDepth' => $categoriesWithDepth,
+            'termekek' => $termekek,
+            'filters' => $szurok]);
+    }
+
 }

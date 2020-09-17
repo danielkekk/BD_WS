@@ -123,7 +123,7 @@ class AttributeValuesSeeder extends Seeder
 
         DB::table('attributes_values')->insert([
             'id' => 16,
-            'categories_id' => 3,
+            'categories_id' => 4,
             'attributes_id' => 2,
             'min' => 1,
             'max' => 100,
@@ -132,7 +132,7 @@ class AttributeValuesSeeder extends Seeder
 
         DB::table('attributes_values')->insert([
             'id' => 17,
-            'categories_id' => 4,
+            'categories_id' => 6,
             'attributes_id' => 2,
             'min' => 1,
             'max' => 100,
@@ -141,7 +141,7 @@ class AttributeValuesSeeder extends Seeder
 
         DB::table('attributes_values')->insert([
             'id' => 18,
-            'categories_id' => 4,
+            'categories_id' => 7,
             'attributes_id' => 2,
             'min' => 1,
             'max' => 100,
@@ -150,42 +150,6 @@ class AttributeValuesSeeder extends Seeder
 
         DB::table('attributes_values')->insert([
             'id' => 19,
-            'categories_id' => 6,
-            'attributes_id' => 2,
-            'min' => 1,
-            'max' => 100,
-            'step' => 1,
-        ]);
-
-        DB::table('attributes_values')->insert([
-            'id' => 20,
-            'categories_id' => 6,
-            'attributes_id' => 2,
-            'min' => 1,
-            'max' => 100,
-            'step' => 1,
-        ]);
-
-        DB::table('attributes_values')->insert([
-            'id' => 21,
-            'categories_id' => 7,
-            'attributes_id' => 2,
-            'min' => 1,
-            'max' => 100,
-            'step' => 1,
-        ]);
-
-        DB::table('attributes_values')->insert([
-            'id' => 22,
-            'categories_id' => 7,
-            'attributes_id' => 2,
-            'min' => 1,
-            'max' => 100,
-            'step' => 1,
-        ]);
-
-        DB::table('attributes_values')->insert([
-            'id' => 23,
             'categories_id' => 8,
             'attributes_id' => 2,
             'min' => 1,
@@ -194,7 +158,7 @@ class AttributeValuesSeeder extends Seeder
         ]);
 
         DB::table('attributes_values')->insert([
-            'id' => 24,
+            'id' => 20,
             'categories_id' => 10,
             'attributes_id' => 2,
             'min' => 1,
@@ -203,16 +167,7 @@ class AttributeValuesSeeder extends Seeder
         ]);
 
         DB::table('attributes_values')->insert([
-            'id' => 25,
-            'categories_id' => 10,
-            'attributes_id' => 2,
-            'min' => 1,
-            'max' => 100,
-            'step' => 1,
-        ]);
-
-        DB::table('attributes_values')->insert([
-            'id' => 26,
+            'id' => 21,
             'categories_id' => 11,
             'attributes_id' => 2,
             'min' => 1,
@@ -221,16 +176,7 @@ class AttributeValuesSeeder extends Seeder
         ]);
 
         DB::table('attributes_values')->insert([
-            'id' => 27,
-            'categories_id' => 11,
-            'attributes_id' => 2,
-            'min' => 1,
-            'max' => 100,
-            'step' => 1,
-        ]);
-
-        DB::table('attributes_values')->insert([
-            'id' => 28,
+            'id' => 22,
             'categories_id' => 12,
             'attributes_id' => 2,
             'min' => 1,
@@ -241,35 +187,35 @@ class AttributeValuesSeeder extends Seeder
 
 
         DB::table('attributes_values')->insert([
-            'id' => 29,
+            'id' => 23,
             'categories_id' => 6,
             'attributes_id' => 3,
             'value' => "Cabernet Franc",
         ]);
 
         DB::table('attributes_values')->insert([
-            'id' => 30,
+            'id' => 24,
             'categories_id' => 6,
             'attributes_id' => 3,
             'value' => "Cuvée",
         ]);
 
         DB::table('attributes_values')->insert([
-            'id' => 31,
+            'id' => 25,
             'categories_id' => 6,
             'attributes_id' => 3,
             'value' => "Bikavér",
         ]);
 
         DB::table('attributes_values')->insert([
-            'id' => 32,
+            'id' => 26,
             'categories_id' => 7,
             'attributes_id' => 3,
             'value' => "Cabernet Franc",
         ]);
 
         DB::table('attributes_values')->insert([
-            'id' => 33,
+            'id' => 27,
             'categories_id' => 7,
             'attributes_id' => 3,
             'value' => "Cuvée",
