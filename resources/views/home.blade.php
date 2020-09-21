@@ -72,6 +72,7 @@
                 <a href="{{ url('/termekek') }}">Termékek</a>
                 <a href="{{ url('/products') }}">Product</a>
                 <a href="{{ url('/categories') }}">Categories</a>
+                <a href="{{ url('/attributumok') }}">Attributes</a>
 
                 <a href="{{ route('logout') }}" onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">Logout</a>

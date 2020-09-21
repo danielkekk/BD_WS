@@ -90,7 +90,7 @@
     @endif
 
     <div class="content" style="text-align: left;">
-        <span style="font-weight: bold;">PRODUCT</span><br>
+        <span style="font-weight: bold;">ATTRIBUTES</span><br>
         <br>
 
         <?php
@@ -99,28 +99,26 @@
                     echo '<span style="color: red; font-weight: bold;">' . $message . '</span><br>';
                 }
             }
-
             echo '<br><br>';
 
-            foreach($categories as $cat) {
-
-                $category = (array)$cat;
-                for($i=0; $i<(int)$category['depth']; $i++) {
-                    echo '&nbsp;&nbsp;';
-                }
-                echo $category['name'] . "<br>";
+            foreach($attributes as $attr) {
+                $attr = (array)$attr;
+                echo $attr['web_name'] . '('.$attr['type_id'].'),  &nbsp;&nbsp;<a href="'.url('/removeattr/'.$attr['id']).'">X</a>&nbsp;&nbsp;';
             }
         ?>
 
-        <br>
+        <br><br><br>
 
-        <form id="create-product-form" action="{{ route('product') }}" method="POST">
+        <form id="create-product-form" action="{{ route('createattr') }}" method="POST">
             @csrf
-            <input id="name" type="text" name="name" value="" placeholder="name" required><br>
-            <input id="code" type="text" name="code" value="" placeholder="code"><br>
-            <input id="qty" type="number" step="1" name="qty" value="" placeholder="qty" required><br>
 
-            <input id="submit" type="submit" name="submit" value="Mentés">
+            <label id="name">Web name</label>
+            <input for="name" id="name" type="text" name="name" value="" placeholder="name" required><br>
+
+            <label id="name">Azon</label>
+            <input for="azon" id="azon" type="text" name="azon" value="" placeholder="azon" required><br>
+
+            <input id="submit" type="submit" name="submit" value="Hozzáadás">
         </form>
     </div>
 </div>

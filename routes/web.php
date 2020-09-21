@@ -42,3 +42,9 @@ Route::get('/removenode/{nodeid}', 'CategoriesController@removeNode')->name('rem
 
 Route::get('/termekek', 'CategoriesController@productsBrowser')->name('termekek')->middleware('auth');
 Route::get('/termekek/{catid}', 'CategoriesController@getTermekek')->middleware('auth');
+
+Route::get('/termekek', 'CategoriesController@productsBrowser')->name('termekek')->middleware('auth');
+
+Route::get('/attributumok', 'CategoriesController@attributesBrowser')->name('attributumok')->middleware('auth');
+Route::post('/createattr', 'CategoriesController@addAttribute')->name('createattr')->middleware('auth');
+Route::get('/removeattr/{id}', 'CategoriesController@removeAttribute')->name('removeattr')->middleware('auth');

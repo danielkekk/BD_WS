@@ -452,7 +452,39 @@ UNLOCK TABLES;
                                         GROUP BY node.id, node.name
                                         ORDER BY node.lft;", []);
 
-        return view('termekek', ['categories' => $categories, 'categoriesWithDepth' => $categoriesWithDepth]);
+
+        $sql = "SELECT av.id AS avid,av.categories_id,av.attributes_id,a.web_name,a.type_id,a.azon,av.value,av.min,av.max,av.step 
+                FROM attributes_values AS av LEFT JOIN attributes AS a ON a.id=av.attributes_id WHERE av.categories_id IN (3) 
+                ORDER BY av.attributes_id ASC;";
+        $filters = DB::select(DB::raw($sql), []);
+
+        $azon = '';
+        $szurok = [];
+        $arrindex = -1;
+        foreach($filters as $a) {
+            $filter = (array)$a;
+
+            if($azon != $filter['azon']) {
+                $azon = $filter['azon'];
+                ++$arrindex;
+                $szurok[] = [
+                    'web_name' => $filter['web_name'],
+                    'type' => $filter['type_id'],
+                    'azon' => $filter['azon'],
+                    'values' => [
+                        ''.$filter['avid'] => $filter['value']
+                    ],
+                    'min' => $filter['min'],
+                    'max' => $filter['max'],
+                    'step' => $filter['step'],
+                ];
+            } else {
+                $szurok[$arrindex]['values'][(string)$filter['avid']] = $filter['value'];
+            }
+        }
+
+        return view('termekek', ['categories' => $categories, 'categoriesWithDepth' => $categoriesWithDepth,
+            'filters' => $szurok]);
     }
 
     public function getTermekek($catid)
@@ -521,6 +553,17 @@ UNLOCK TABLES;
         WHERE category_id IN (3) AND ((av.value='Botanic') AND (pav.value>1 AND pav.value<78)) ORDER BY pr.id ASC
         */
 
+        /*Meg kell nézni hány darab sor volt ha anyi mint amennyi szűrőfeltétel azokat az idjú productokat kilistázzuk
+         *
+          SELECT pr.id, COUNT(pr.id) AS countpr, pr.name FROM products AS pr
+          LEFT JOIN products_attributes_values AS pav ON pav.products_id=pr.id
+          LEFT JOIN attributes AS attr ON attr.id=pav.attributes_id LEFT JOIN attributes_values AS av ON av.id=pav.attributes_values_id
+          WHERE category_id IN (3) AND ((pav.attributes_values_id=1) OR (pav.value>1 AND pav.value<49))
+          GROUP BY pr.id HAVING COUNT(pr.id)=2 ORDER BY pr.id ASC
+         *
+         *
+         */
+
         //TODO lekérdezni a kategóriához tartozó szűrőket, attribútumokat
         //TODO lekérdezni minden termékhez a hozzá tartozó szűrőit és azok értékeit
         /*Adott kategóriához az összes szűrő
@@ -561,6 +604,41 @@ UNLOCK TABLES;
         return view('termekek', ['categoriesWithDepth' => $categoriesWithDepth,
             'termekek' => $termekek,
             'filters' => $szurok]);
+    }
+
+    public function attributesBrowser()
+    {
+        $attr = DB::select("SELECT *
+                                        FROM attributes;", []);
+
+        return view('attributes', ['attributes' => $attr]);
+    }
+
+    public function addAttribute(Request $request)
+    {
+        $isExistAttr = (array)DB::selectOne("SELECT id
+                                        FROM attributes
+                                        WHERE azon = :azon;", ['azon' => Str::lower($request['azon'])]);
+
+        if(empty($isExistAttr)) {
+            $inserted = DB::insert('INSERT INTO attributes(web_name, name, azon, type_id) VALUES(:web_name, :name, :azon, :type_id);',
+                ['web_name' => trim($request['name']),
+                    'name' => trim($request['azon']),
+                    'azon' => trim($request['azon']),
+                    'type_id' => 'select']);
+        }
+
+        return redirect()->route('attributumok');
+    }
+
+    public function removeAttribute($id)
+    {
+        $deleted = DB::delete('DELETE FROM attributes WHERE id = :id;',['id' => trim($id)]);
+
+        //itt még törölni kell más táblákból is dolgokat
+        //TODO kaszkádolt törlés???
+
+        return redirect()->route('attributumok');
     }
 
 }
