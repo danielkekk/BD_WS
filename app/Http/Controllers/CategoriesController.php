@@ -641,4 +641,72 @@ UNLOCK TABLES;
         return redirect()->route('attributumok');
     }
 
+    public function attributesValuesBrowser($attrid)
+    {
+        $attributesvalues = DB::select("SELECT * FROM attributes_values WHERE attributes_id=:aid;", ['aid' => $attrid]);
+
+        $categories = DB::select("SELECT * FROM categories;", []);
+
+        return view('attributesvalues', ['attributesvalues' => $attributesvalues,
+            'categories' => $categories,
+            'attribute_id' => $attrid]);
+    }
+
+    public function addAttributeValue(Request $request)
+    {
+        $inserted = DB::insert('INSERT INTO attributes_values(categories_id, attributes_id, value) VALUES(:categories_id, :attributes_id, :value);',
+            ['categories_id' => trim($request['attrcategory']),
+                'attributes_id' => trim($request['attrid']),
+                'value' => trim($request['value'])]);
+
+        return redirect()->route('addattributesvalues', ['attrid' => trim($request['attrid'])]);
+    }
+
+    public function removeAttributeValue($attrid, $id)
+    {
+        $deleted = DB::delete('DELETE FROM attributes_values WHERE id = :id;',['id' => trim($id)]);
+
+        //itt még törölni kell más táblákból is dolgokat
+        //TODO kaszkádolt törlés???
+
+        return redirect()->route('addattributesvalues', ['attrid' => trim($attrid)]);
+    }
+
+    public function categoriesAttributesBrowser($categoryid)
+    {
+        $categoriesattributes = DB::select("SELECT * FROM attributes 
+                                                WHERE id NOT IN (
+                                                SELECT attributes_id 
+                                                FROM categories_attributes WHERE categories_id=:cid);", ['cid' => $categoryid]);
+
+        $attributes = DB::select("SELECT attr.id, cattr.categories_id, cattr.attributes_id, attr.web_name FROM categories_attributes AS cattr LEFT JOIN attributes AS attr ON cattr.attributes_id = attr.id 
+                                        WHERE categories_id=:cid", ['cid' => $categoryid]);
+
+        return view('categoriesattributes', ['categoriesattributes' => $categoriesattributes,
+            'attributes' => $attributes,
+            'category_id' => $categoryid]);
+    }
+
+    public function addCategoriesAttribute(Request $request)
+    {
+        $inserted = DB::insert('INSERT INTO categories_attributes(categories_id, attributes_id) VALUES(:categories_id, :attributes_id);',
+            ['categories_id' => trim($request['categoryid']),
+                'attributes_id' => trim($request['attributes'])]);
+
+        return redirect()->route('categoriesattributes', ['categoryid' => trim($request['categoryid'])]);
+    }
+
+    public function removeCategoriesAttribute($categoriesid, $attributesid)
+    {
+        $deleted = DB::delete('DELETE FROM categories_attributes 
+                                      WHERE categories_id = :catid AND attributes_id = :attrid;'
+                                     ,['catid' => trim($categoriesid),
+                                        'attrid' => trim($attributesid)]);
+
+        //itt még törölni kell más táblákból is dolgokat
+        //TODO kaszkádolt törlés???
+
+        return redirect()->route('categoriesattributes', ['categoryid' => trim($categoriesid)]);
+    }
+
 }

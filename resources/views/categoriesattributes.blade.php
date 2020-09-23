@@ -90,7 +90,7 @@
     @endif
 
     <div class="content" style="text-align: left;">
-        <span style="font-weight: bold;">ATTRIBUTES</span><br>
+        <span style="font-weight: bold;">ATTRIBUTES VALUES</span><br>
         <br>
 
         <?php
@@ -103,20 +103,25 @@
 
             foreach($attributes as $attr) {
                 $attr = (array)$attr;
-                echo '<a href="'.url('/addattributesvalues/'.$attr['id']).'">'.$attr['web_name'].'</a>' . '('.$attr['type_id'].'),  &nbsp;&nbsp;<a href="'.url('/removeattr/'.$attr['id']).'">X</a><br>';
+                echo $attr['web_name'] . '('.$attr['categories_id'] . ', ' . $attr['attributes_id'] . ')  &nbsp;&nbsp;<a href="'.url('/removecategoriesattribute/'.$category_id . '/' . $attr['id']).'">X</a><br>';
             }
         ?>
 
         <br><br><br>
 
-        <form id="create-product-form" action="{{ route('createattr') }}" method="POST">
+        <form id="create-product-form" action="{{ route('createcategoriesattribute') }}" method="POST">
             @csrf
 
-            <label id="name">Web name</label>
-            <input for="name" id="name" type="text" name="name" value="" placeholder="name" required><br>
+            <input id="categoryid" type="hidden" name="categoryid" value="<?php echo $category_id;?>"/><br>
 
-            <label id="name">Azon</label>
-            <input for="azon" id="azon" type="text" name="azon" value="" placeholder="azon" required><br>
+            <label id="name">Attribute</label>
+            <select id="attributes" name="attributes">
+                <?php foreach($categoriesattributes as $catattr) {
+                $catattr = (array)$catattr; ?>
+                    <option value="<?php echo $catattr['id'];?>"><?php echo $catattr['web_name'];?></option>
+                <?php } ?>
+            </select>
+            <br>
 
             <input id="submit" type="submit" name="submit" value="Hozzáadás">
         </form>

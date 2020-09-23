@@ -48,3 +48,10 @@ Route::get('/termekek', 'CategoriesController@productsBrowser')->name('termekek'
 Route::get('/attributumok', 'CategoriesController@attributesBrowser')->name('attributumok')->middleware('auth');
 Route::post('/createattr', 'CategoriesController@addAttribute')->name('createattr')->middleware('auth');
 Route::get('/removeattr/{id}', 'CategoriesController@removeAttribute')->name('removeattr')->middleware('auth');
+Route::get('/addattributesvalues/{attrid}', 'CategoriesController@attributesValuesBrowser')->name('addattributesvalues')->middleware('auth');
+Route::post('/createattrvalue', 'CategoriesController@addAttributeValue')->name('createattrvalue')->middleware('auth');
+Route::get('/removeattrvalue/{attrid}/{id}', 'CategoriesController@removeAttributeValue')->name('removeattrvalue')->middleware('auth');
+
+Route::get('/categoriesattributes/{categoryid}', 'CategoriesController@categoriesAttributesBrowser')->name('categoriesattributes')->middleware('auth');
+Route::post('/createcategoriesattribute', 'CategoriesController@addCategoriesAttribute')->name('createcategoriesattribute')->middleware('auth');
+Route::get('/removecategoriesattribute/{categoriesid}/{attributesid}', 'CategoriesController@removeCategoriesAttribute')->name('removecategoriesattribute')->middleware('auth');

@@ -106,7 +106,7 @@
                 for($i=0; $i<(int)$category['depth']; $i++) {
                     echo '&nbsp;&nbsp;';
                 }
-                echo $category['name'] . '&nbsp;&nbsp;<a href="'.url('/removenode/'.$cat->id).'">X</a><br>';
+                echo '<a href="'.url('/categoriesattributes/'.$cat->id).'">' . $category['name'] . '</a>' . '&nbsp;&nbsp;<a href="'.url('/removenode/'.$cat->id).'">X</a><br>';
             }
         ?>
 

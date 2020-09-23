@@ -90,7 +90,7 @@
     @endif
 
     <div class="content" style="text-align: left;">
-        <span style="font-weight: bold;">ATTRIBUTES</span><br>
+        <span style="font-weight: bold;">ATTRIBUTES VALUES</span><br>
         <br>
 
         <?php
@@ -101,22 +101,30 @@
             }
             echo '<br><br>';
 
-            foreach($attributes as $attr) {
+            foreach($attributesvalues as $attr) {
                 $attr = (array)$attr;
-                echo '<a href="'.url('/addattributesvalues/'.$attr['id']).'">'.$attr['web_name'].'</a>' . '('.$attr['type_id'].'),  &nbsp;&nbsp;<a href="'.url('/removeattr/'.$attr['id']).'">X</a><br>';
+                echo $attr['value'] . '('.$attr['categories_id'] . ', ' . $attr['attributes_id'] . ')  &nbsp;&nbsp;<a href="'.url('/removeattrvalue/'.$attr['attributes_id'].'/'.$attr['id']).'">X</a><br>';
             }
         ?>
 
         <br><br><br>
 
-        <form id="create-product-form" action="{{ route('createattr') }}" method="POST">
+        <form id="create-product-form" action="{{ route('createattrvalue') }}" method="POST">
             @csrf
 
-            <label id="name">Web name</label>
-            <input for="name" id="name" type="text" name="name" value="" placeholder="name" required><br>
+            <input id="attrid" type="hidden" name="attrid" value="<?php echo $attribute_id;?>"/><br>
 
-            <label id="name">Azon</label>
-            <input for="azon" id="azon" type="text" name="azon" value="" placeholder="azon" required><br>
+            <label id="name">Category</label>
+            <select id="attrcategory" name="attrcategory">
+                <?php foreach($categories as $category) {
+                $category = (array)$category; ?>
+                    <option value="<?php echo $category['id'];?>"><?php echo $category['web_name'];?></option>
+                <?php } ?>
+            </select>
+            <br>
+
+            <label id="name">Value</label>
+            <input for="name" id="value" type="text" name="value" value="" placeholder="name" required><br>
 
             <input id="submit" type="submit" name="submit" value="Hozzáadás">
         </form>
