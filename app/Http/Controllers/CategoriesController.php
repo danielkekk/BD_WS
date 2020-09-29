@@ -29,7 +29,7 @@ class CategoriesController extends Controller
                                         FROM categories AS node,
                                         categories AS parent
                                         WHERE node.lft BETWEEN parent.lft AND parent.rgt
-                                        AND parent.name = 'ELECTRONICS'
+                                        AND parent.name = 'termekek'
                                         ORDER BY node.lft;", []);
 
         $categoriesWithDepth = DB::select("SELECT node.id, node.name, (COUNT(parent.name) - 1) AS depth
@@ -442,7 +442,7 @@ UNLOCK TABLES;
                                         FROM categories AS node,
                                         categories AS parent
                                         WHERE node.lft BETWEEN parent.lft AND parent.rgt
-                                        AND parent.name = 'ELECTRONICS'
+                                        AND parent.name = 'termekek'
                                         ORDER BY node.lft;", []);
 
         $categoriesWithDepth = DB::select("SELECT node.id, node.name, (COUNT(parent.name) - 1) AS depth
@@ -485,6 +485,155 @@ UNLOCK TABLES;
 
         return view('termekek', ['categories' => $categories, 'categoriesWithDepth' => $categoriesWithDepth,
             'filters' => $szurok]);
+    }
+
+    public function getEloSzurtTermekek(Request $request)
+    {
+        $filter = '';
+        //itt kihámozzuk és összeállítjuk a querysztringet
+
+        //var_dump($request->all()); die;
+
+        $filters = $request->all();
+
+        foreach($request->all() as $key => $value) {
+            //lekérdezni az attr azont idt typeot
+            //ha select lekérdezni explode 2. index érték
+            //lekérdezés  $attributeAzon
+            $selectedAttribute = (array)DB::selectOne("SELECT *
+                                            FROM attributes
+                                            WHERE LOWER(azon)=LOWER(:azon);", [':azon' => mb_strtolower($key)]);
+
+            if((string)$key == "catid") {
+                $filter .= 'cat\\' . $value . '|';
+            } else {
+
+                if($selectedAttribute['type_id'] == 'number') {
+                    $filter .= $key.'\\' . $value . ',100|';
+                } else if($selectedAttribute['type_id'] == 'select') {
+                    $ertek = explode('_',$value);
+                    $filter .= $key.'\\' . $ertek[1] . '|';
+                }
+            }
+        }
+
+        //var_dump(mb_substr($filter, 0, -1)); die;
+
+        //levenni az uccsó karaktert.  mb_substr($string, 0, -1);
+        //'cat\3|alkoholtartalom\10,44|gyarto\1'
+        return redirect()->route('termekszures', ['filter' => mb_substr($filter, 0, -1)]);
+    }
+
+    public function getSzurtTermekek(Request $request)
+    {
+        $filter = $request->input('filter');
+
+        $categoriesWithDepth = DB::select("SELECT node.id, node.name, (COUNT(parent.name) - 1) AS depth
+                                        FROM categories AS node,
+                                                categories AS parent
+                                        WHERE node.lft BETWEEN parent.lft AND parent.rgt
+                                        GROUP BY node.id, node.name
+                                        ORDER BY node.lft;", []);
+
+        //cat\12|alkoholtartalom\10,56|gyarto\2,3,6|szolofajta\2,23
+
+        $queryStringArray = explode('|',$filter);
+        $category = '';
+        $attributesValuesIds = [];
+        $attributesValues = [];
+
+        foreach($queryStringArray as $a) {
+            $queryStringArrayArray = explode('\\',$a);
+            $attributeAzon = $queryStringArrayArray[0];
+            $attributeValues = $queryStringArrayArray[1];
+
+            if(mb_strtolower(trim($attributeAzon))=='cat') {
+                $category = (int)$attributeValues;
+            } else {
+                //lekérdezés  $attributeAzon
+                $selectedAttribute = (array)DB::selectOne("SELECT *
+                                            FROM attributes
+                                            WHERE LOWER(azon)=LOWER(:azon);", [':azon' => $attributeAzon]);
+
+                $valuesArray = explode(',',$attributeValues);
+                if($selectedAttribute['type_id'] == 'number') {
+                    $attributesValues[] = '(pav.value>'.trim($valuesArray[0]).' AND pav.value<'.trim($valuesArray[1]).')';
+                } else if($selectedAttribute['type_id'] == 'select') {
+                    $attributesValuesIds = array_merge($attributesValuesIds, $valuesArray);
+                }
+            }
+            //category_id IN (".implode(',', $childs).")
+        }
+
+        //var_dump($attributesValues); die;
+
+        $sqlInside = "SELECT pro.id FROM products AS pro
+          LEFT JOIN products_attributes_values AS pav ON pav.products_id=pro.id
+          LEFT JOIN attributes AS attr ON attr.id=pav.attributes_id
+          LEFT JOIN attributes_values AS av ON av.id=pav.attributes_values_id
+          WHERE pro.category_id IN (".trim($category).") 
+          AND ((pav.attributes_values_id IN (".implode(',', $attributesValuesIds).")) OR ".implode(' OR ', $attributesValues).")
+          GROUP BY pro.id
+          HAVING COUNT(pro.id)=".(count($queryStringArray)-1)."
+          ORDER BY pro.id ASC";
+
+        //var_dump($sqlInside); die;
+
+        $sql = "SELECT pr.id AS productid,pr.category_id,pr.name,pr.qty,pav.id,pav.products_id,pav.attributes_id,pav.attributes_values_id,pav.value AS pavvalue, attr.id,attr.web_name AS attrname, av.id,av.value AS avvalue 
+                    FROM products AS pr LEFT JOIN products_attributes_values AS pav ON pav.products_id=pr.id 
+                    LEFT JOIN attributes AS attr ON attr.id=pav.attributes_id 
+                    LEFT JOIN attributes_values AS av ON av.id=pav.attributes_values_id 
+                    WHERE pr.id IN (".$sqlInside.") ORDER BY pr.id ASC;";
+        $termekek = DB::select(DB::raw($sql), []);
+
+
+        /*
+         * SELECT pr.id AS productid, COUNT(pr.id) AS countpr, pr.name FROM products AS pr
+          LEFT JOIN products_attributes_values AS pav ON pav.products_id=pr.id
+          LEFT JOIN attributes AS attr ON attr.id=pav.attributes_id
+          LEFT JOIN attributes_values AS av ON av.id=pav.attributes_values_id
+          WHERE pr.category_id IN (3) AND ((pav.attributes_values_id=1) OR (pav.value>1 AND pav.value<49))
+          GROUP BY pr.id
+          HAVING COUNT(pr.id)=2
+          ORDER BY pr.id ASC;
+         */
+
+        $childs = [$category];
+        $sql = "SELECT av.id AS avid,av.categories_id,av.attributes_id,a.web_name,a.type_id,a.azon,av.value,av.min,av.max,av.step 
+                FROM attributes_values AS av LEFT JOIN attributes AS a ON a.id=av.attributes_id 
+                WHERE av.categories_id IN (".implode(',', $childs).") 
+                ORDER BY av.attributes_id ASC;";
+        $filters = DB::select(DB::raw($sql), []);
+
+        $azon = '';
+        $szurok = [];
+        $arrindex = -1;
+        foreach($filters as $a) {
+            $filter = (array)$a;
+
+            if($azon != $filter['azon']) {
+                $azon = $filter['azon'];
+                ++$arrindex;
+                $szurok[] = [
+                    'web_name' => $filter['web_name'],
+                    'type' => $filter['type_id'],
+                    'azon' => $filter['azon'],
+                    'values' => [
+                        ''.$filter['avid'] => $filter['value']
+                    ],
+                    'min' => $filter['min'],
+                    'max' => $filter['max'],
+                    'step' => $filter['step'],
+                ];
+            } else {
+                $szurok[$arrindex]['values'][(string)$filter['avid']] = $filter['value'];
+            }
+        }
+
+        return view('termekek', ['categoriesWithDepth' => $categoriesWithDepth,
+            'termekek' => $termekek,
+            'filters' => $szurok,
+            'catid' => $category]);
     }
 
     public function getTermekek($catid)
@@ -545,21 +694,23 @@ UNLOCK TABLES;
         }
 
 
-        /*TODO
-        SELECT pr.id AS productid,attr.web_name,pr.category_id,pr.name,pr.qty,pav.id,pav.products_id,pav.attributes_id,
-        pav.attributes_values_id,pav.value AS pavvalue, attr.id,attr.web_name AS attrname, attr.azon AS attrazon, av.id,
-        av.value AS avvalue FROM products AS pr LEFT JOIN products_attributes_values AS pav ON pav.products_id=pr.id
-        LEFT JOIN attributes AS attr ON attr.id=pav.attributes_id LEFT JOIN attributes_values AS av ON av.id=pav.attributes_values_id
-        WHERE category_id IN (3) AND ((av.value='Botanic') AND (pav.value>1 AND pav.value<78)) ORDER BY pr.id ASC
-        */
+        /*amelyik prid szerepel a felsorolásban azok adatait kell visszaadni.
+        bejön prid ??, catid,  szűrőfeltételek valamilyen formátumban
 
-        /*Meg kell nézni hány darab sor volt ha anyi mint amennyi szűrőfeltétel azokat az idjú productokat kilistázzuk
+        ?route=filter&filter=category|163/hatizsak_urmeret_szuro|4,3,5,1/marka|49,55/nemek|2,1,3
+
+        -route
+        -$filter=cat\12|alkoholtartalom\10,56|gyarto\2,3,6|szolofajta\2,23
+
          *
-          SELECT pr.id, COUNT(pr.id) AS countpr, pr.name FROM products AS pr
+          SELECT pr.id AS productid, COUNT(pr.id) AS countpr, pr.name FROM products AS pr
           LEFT JOIN products_attributes_values AS pav ON pav.products_id=pr.id
-          LEFT JOIN attributes AS attr ON attr.id=pav.attributes_id LEFT JOIN attributes_values AS av ON av.id=pav.attributes_values_id
-          WHERE category_id IN (3) AND ((pav.attributes_values_id=1) OR (pav.value>1 AND pav.value<49))
-          GROUP BY pr.id HAVING COUNT(pr.id)=2 ORDER BY pr.id ASC
+          LEFT JOIN attributes AS attr ON attr.id=pav.attributes_id
+          LEFT JOIN attributes_values AS av ON av.id=pav.attributes_values_id
+          WHERE pr.category_id IN (3) AND ((pav.attributes_values_id=1) OR (pav.value>1 AND pav.value<49))
+          GROUP BY pr.id
+          HAVING COUNT(pr.id)=2
+          ORDER BY pr.id ASC;
          *
          *
          */
@@ -570,8 +721,10 @@ UNLOCK TABLES;
          * SELECT av.categories_id,av.attributes_id,a.web_name,a.azon,av.value,av.min,av.max,av.step
         FROM attributes_values AS av LEFT JOIN attributes AS a ON a.id=av.attributes_id WHERE av.categories_id IN (3)
          */
+        $childs = [$catid];
         $sql = "SELECT av.id AS avid,av.categories_id,av.attributes_id,a.web_name,a.type_id,a.azon,av.value,av.min,av.max,av.step 
-                FROM attributes_values AS av LEFT JOIN attributes AS a ON a.id=av.attributes_id WHERE av.categories_id IN (3) 
+                FROM attributes_values AS av LEFT JOIN attributes AS a ON a.id=av.attributes_id 
+                WHERE av.categories_id IN (".implode(',', $childs).") 
                 ORDER BY av.attributes_id ASC;";
         $filters = DB::select(DB::raw($sql), []);
 
@@ -603,8 +756,132 @@ UNLOCK TABLES;
         //echo implode(",", $childs); exit;
         return view('termekek', ['categoriesWithDepth' => $categoriesWithDepth,
             'termekek' => $termekek,
-            'filters' => $szurok]);
+            'filters' => $szurok,
+            'catid' => $catid]);
     }
+
+
+    public function getTermek($productId)
+    {
+        //lekérdezzük a termék adatait és a values adatokat
+        //lekérdezzük a kategóriáját
+        //lekérdezzük a kathoz tartozó attribútumokat
+        //az attribútumokhoz tartozó beállítható értékeket
+        $sql = "SELECT pr.id AS productid,pr.category_id,pr.name,pr.qty,pav.id,pav.products_id,pav.attributes_id,
+pav.attributes_values_id,pav.value AS pavvalue, attr.id AS attrid,attr.web_name AS attrname, av.id AS avid,av.value AS avvalue 
+                    FROM products AS pr 
+                    LEFT JOIN products_attributes_values AS pav ON pav.products_id=pr.id 
+                    LEFT JOIN attributes AS attr ON attr.id=pav.attributes_id 
+                    LEFT JOIN attributes_values AS av ON av.id=pav.attributes_values_id 
+                    WHERE pr.id=:prid;";
+        $termekek = DB::select(DB::raw($sql), ['prid' => $productId]);
+
+        //lekérdezzük a categid-hoz tartozó összes attrt és értékeiket
+        $sql = "SELECT attr.id AS attrid, attr.web_name, attr.azon, attr.type_id, av.id AS avid, av.value, av.min, av.max, av.step
+                FROM categories_attributes AS catattr 
+                LEFT JOIN attributes AS attr ON attr.id=catattr.attributes_id 
+                LEFT JOIN attributes_values AS av ON av.attributes_id=attr.id 
+                WHERE catattr.categories_id=:catid AND av.categories_id=:catid1;";
+        $attributes = DB::select(DB::raw($sql), ['catid' => $termekek[0]->category_id,'catid1' => $termekek[0]->category_id]);
+
+        $azon = '';
+        $szurok = [];
+        $arrindex = -1;
+        foreach($attributes as $a) {
+            $filter = (array)$a;
+
+            if($azon != $filter['azon']) {
+                $sql = "SELECT id,attributes_values_id,value 
+                        FROM products_attributes_values 
+                        WHERE products_id=:prid AND attributes_id=:attrid;";
+                $savedvalue = (array)DB::selectOne(DB::raw($sql), ['prid' => $productId,'attrid' => $filter['attrid']]);
+
+                $azon = $filter['azon'];
+                ++$arrindex;
+                $szurok[] = [
+                    'web_name' => $filter['web_name'],
+                    'type' => $filter['type_id'],
+                    'azon' => $filter['azon'],
+                    'values' => [
+                        ''.$filter['avid'] => $filter['value']
+                    ],
+                    'min' => $filter['min'],
+                    'max' => $filter['max'],
+                    'step' => $filter['step'],
+                    'saved_attributes_value_id' => $savedvalue['attributes_values_id'] ?? null,
+                    'saved_attributes_value' => $savedvalue['value'] ?? null,
+                ];
+            } else {
+                $szurok[$arrindex]['values'][(string)$filter['avid']] = $filter['value'];
+            }
+        }
+
+        return view('termek', [
+            'termekek' => $termekek,
+            'attributes' => $szurok,
+            'catid' => $termekek[0]->category_id,
+            'productid' => $termekek[0]->productid,
+        ]);
+    }
+
+    public function createProductAttributesValue(Request $request)
+    {
+        //ciklus minden attributumra új sok insert, input name attr azon
+        //megnézni az összes kategoriához tartoz attributumot h mi az értéke
+        //prid, attrid, attrvaluesid mentése
+        //insert
+
+        //lekérdezzük a categid-hoz tartozó összes attrt és értékeiket
+        $sql = "SELECT attr.id AS attrid, attr.azon, attr.type_id, av.id AS avid
+                FROM categories_attributes AS catattr 
+                LEFT JOIN attributes AS attr ON attr.id=catattr.attributes_id 
+                LEFT JOIN attributes_values AS av ON av.attributes_id=attr.id 
+                WHERE catattr.categories_id=:catid AND av.categories_id=:catid1;";
+        $attributes = DB::select(DB::raw($sql), [':catid' => $request['catid'], ':catid1' => $request['catid']]);
+
+        foreach($attributes as $attr) {
+            $attr = (array)$attr;
+
+            //meg kell nézni létezike már az adott termék adott attrje.
+            //ha igen update csak
+            $sql = "SELECT id
+                FROM products_attributes_values
+                WHERE products_id=:products_id AND attributes_id=:attributes_id;";
+            $row = DB::select(DB::raw($sql), ['products_id' => trim($request['productid']), 'attributes_id' => $attr['attrid']]);
+
+
+            if(isset($row[0]->id)) {
+                //print_r($request['azon']); exit;
+                if($attr['type_id'] == 'number') {
+                    $updated = DB::update('UPDATE products_attributes_values SET value=:value
+                                                  WHERE products_id=:products_id AND attributes_id=:attributes_id;',
+                        ['value' => trim($request[(string)$attr['azon']]),
+                            'products_id' => trim($request['productid']),
+                            'attributes_id' => $attr['attrid']]);
+                } else if($attr['type_id'] == 'select') {
+                   //print_r(trim($request['azon'])); exit;
+                    $updated = DB::update('UPDATE products_attributes_values SET attributes_values_id=:attributes_values_id
+                                                  WHERE products_id=:products_id AND attributes_id=:attributes_id;',
+                        ['attributes_values_id' => trim($request[(string)$attr['azon']]),
+                            'products_id' => trim($request['productid']),
+                            'attributes_id' => $attr['attrid']]);
+                }
+            } else {
+                if($attr['type_id'] == 'number') {
+                    $inserted = DB::insert('INSERT INTO products_attributes_values(products_id,attributes_id,value) VALUES(:products_id,:attributes_id,:value);',
+                        ['products_id' => trim($request['productid']),
+                            'attributes_id' => $attr['attrid'],
+                            'value' => trim($request[(string)$attr['azon']])]);
+                } else if($attr['type_id'] == 'select') {
+                    $inserted = DB::insert('INSERT INTO products_attributes_values(products_id,attributes_id,attributes_values_id) VALUES(:products_id,:attributes_id,:attributes_values_id);',
+                        ['products_id' => trim($request['productid']),
+                            'attributes_id' => $attr['attrid'],
+                            'attributes_values_id' => trim($request[(string)$attr['azon']])]);
+                }
+            }
+        }
+    }
+
 
     public function attributesBrowser()
     {

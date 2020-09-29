@@ -109,30 +109,32 @@
                 echo '<a href="'.url('/termekek/'.$cat->id).'">'.$category['name'].'</a><br>';
             }
 
-        echo '<br><br><br>';
+        echo '<br><br><br>';?>
 
 
+        <form id="filter-form" action="{{ route('termekeloszures') }}" method="GET">
 
-            echo '<form id="filter-form" action="" method="GET">';?>
-        @csrf
-        <?php
-        foreach($filters as $filter) {
-            echo $filter['web_name'] . '<br>';
-            if($filter['type'] == 'select') {
-                echo '<select id="'.$filter['azon'].'" name="'.$filter['azon'].'">';
-                foreach($filter['values'] as $key => $val) {
-                    echo '<option value="attr_'.$key.'">'.$val.'</option>';
+            <input type="hidden" name="catid" id="catid" value="<?php echo $catid ?? ''; ?>"/>
+
+            <?php
+            foreach($filters as $filter) {
+                echo $filter['web_name'] . '<br>';
+                if($filter['type'] == 'select') {
+                    echo '<select id="'.$filter['azon'].'" name="'.$filter['azon'].'">';
+                    foreach($filter['values'] as $key => $val) {
+                        echo '<option value="attr_'.$key.'">'.$val.'</option>';
+                    }
+                    echo '</select>';
+                } else if($filter['type'] == 'number') {
+                    echo '<input type="number" id="'.$filter['azon'].'" name="'.$filter['azon'].'" value="10"/>';
                 }
-                echo '</select>';
-            } else if($filter['type'] == 'number') {
-                echo '<input type="number" id="'.$filter['azon'].'" name="'.$filter['azon'].'" value="10"/>';
-            }
-            echo '<br>';
-        }
+                echo '<br>';
+            }?>
 
-        echo '<input type="submit" value="Szűrés"/>';
-        echo '</form>';
+         <input type="submit" value="Szűrés"/>
+        </form>
 
+        <?php
             echo '<br><br><br>';
 
             if(!empty($termekek)) {
@@ -144,7 +146,8 @@
 
                     if((int)$currentproduct != (int)$termek['productid']) {
                         $currentproduct = (int)$termek['productid'];
-                        echo $termek['name']." qty:" . $termek['qty'] . "<br>";
+
+                        echo '<a href="'.url('/termek/'.$termek['productid']).'">' . $termek['name'] . '</a> qty:' . $termek['qty'] . '<br>';
 
                         foreach($termekek as $a) {
                             $attr = (array)$a;

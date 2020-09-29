@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
@@ -27,7 +28,12 @@ class ProductController extends Controller
     {
         $products = Product::all();
 
-        return view('product', ['products' => $products]);
+        $categories = DB::select("SELECT id,web_name,azon FROM categories;", []);
+
+        return view('product', [
+            'products' => $products,
+            'categories' => $categories
+        ]);
     }
 
     /**
@@ -64,19 +70,24 @@ class ProductController extends Controller
             'name' => 'required|string|max:20',
             'code' => 'required|string|max:20',
             'qty' => 'required|integer|between:1,1000',
+            'category' => 'required',
         ], $messages);
 
         if ($validator->fails()) {
             return redirect('products')
                 ->withErrors($validator)
-
                 ->withInput();
         }
+        //print_r($request->category); exit;
+        $cat = explode(':' ,trim($request->category));
 
         $product = new Product();
         $product->name = $request->name;
         $product->code = $request->code;
         $product->qty = $request->qty;
+        $product->category_id = $cat[1];
+        $product->category_azon = $cat[0];
+        $product->active = 1;
         $product->save();
 
 

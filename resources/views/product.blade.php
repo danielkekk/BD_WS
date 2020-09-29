@@ -117,6 +117,17 @@
             <input id="code" type="text" name="code" value="" placeholder="code"><br>
             <input id="qty" type="number" step="1" name="qty" value="" placeholder="qty" required><br>
 
+            <select id="category" name="category">
+                <?php
+                    foreach($categories as $cat) {
+                        $cat = (array)$cat;
+                        $value = $cat['azon'] . ":" . $cat['id'];
+
+                        echo '<option value="'.$value.'">'.$cat['web_name'].'</option>';
+                    }
+                ?>
+            </select><br>
+
             <input id="submit" type="submit" name="submit" value="Mentés">
         </form>
     </div>
