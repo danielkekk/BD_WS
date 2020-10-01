@@ -124,6 +124,8 @@
 
             <label id="name">Name</label>
             <input for="name" id="name" type="text" name="name" value="" placeholder="name" required><br>
+            <label id="azon">Name</label>
+            <input for="azon" id="azon" type="text" name="azon" value="" placeholder="azon" required><br>
 
             <input id="submit" type="submit" name="submit" value="Hozzáadás">
         </form>

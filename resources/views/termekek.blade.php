@@ -120,13 +120,20 @@
             foreach($filters as $filter) {
                 echo $filter['web_name'] . '<br>';
                 if($filter['type'] == 'select') {
-                    echo '<select id="'.$filter['azon'].'" name="'.$filter['azon'].'">';
+
+                    foreach($filter['values'] as $key => $val) {
+                        $chxboxname = $filter['azon'] . '_' . $key;
+                        echo '<input type="checkbox" id="'.$chxboxname.'" name="'.$chxboxname.'" value="attrid_'.$key.'">';
+                        echo '<label for="'.$chxboxname.'">'.$val.'</label><br>';
+                    }
+
+                    /*echo '<select id="'.$filter['azon'].'" name="'.$filter['azon'].'">';
                     foreach($filter['values'] as $key => $val) {
                         echo '<option value="attr_'.$key.'">'.$val.'</option>';
                     }
-                    echo '</select>';
+                    echo '</select>';*/
                 } else if($filter['type'] == 'number') {
-                    echo '<input type="number" id="'.$filter['azon'].'" name="'.$filter['azon'].'" value="10"/>';
+                    echo '<input type="number" id="'.$filter['azon'].'_1" name="'.$filter['azon'].'_1" value=""/>';
                 }
                 echo '<br>';
             }?>

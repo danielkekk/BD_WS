@@ -369,8 +369,10 @@ UNLOCK TABLES;
             $updated = DB::update("UPDATE categories SET rgt = rgt + 2 WHERE rgt > :myLeft;", ['myLeft' => $lft['lft']]);
             $updated1 = DB::update("UPDATE categories SET lft = lft + 2 WHERE lft > :myLeft;", ['myLeft' => $lft['lft']]);
 
-            $inserted = DB::insert('INSERT INTO categories(name, lft, rgt) VALUES(:newnode, :myLeftplusone, :myLeftplustwo);',
-                ['newnode' => trim($request['name']),
+            $inserted = DB::insert('INSERT INTO categories(web_name, name, azon, lft, rgt) VALUES(:web_name, :name, :newnode, :myLeftplusone, :myLeftplustwo);',
+                ['web_name' => trim($request['name']),
+                    'name' => trim($request['azon']),
+                    'newnode' => trim($request['azon']),
                     'myLeftplusone' => ((int)$lft['lft']+1),
                     'myLeftplustwo' => ((int)$lft['lft']+2)]);
 
@@ -496,31 +498,57 @@ UNLOCK TABLES;
 
         $filters = $request->all();
 
+        //array(4) { ["gyarto_1"]=> string(6) "attr_1" ["gyarto_2"]=> string(6) "attr_2" ["alkoholtartalom"]=> string(2) "10" }
+
+        $attrValues = [];
         foreach($request->all() as $key => $value) {
-            //lekérdezni az attr azont idt typeot
-            //ha select lekérdezni explode 2. index érték
-            //lekérdezés  $attributeAzon
-            $selectedAttribute = (array)DB::selectOne("SELECT *
-                                            FROM attributes
-                                            WHERE LOWER(azon)=LOWER(:azon);", [':azon' => mb_strtolower($key)]);
+            //explode kivessszük azon és értéket
+            //egy tömbbe beletesszük key az azon értéke string hozzáfűzve az érték
+            //'azon' => '1,2,3,';
+            //végén lesz egy tömbünk értékekkekl azon kulcsokkal
+            //ezen végigmegyünk, összeállítjuk a query sztringet
 
-            if((string)$key == "catid") {
-                $filter .= 'cat\\' . $value . '|';
+            if ((string)$key == "catid") {
+                if (!isset($attrValues['cat'])) {
+                    $attrValues['cat'] = '';
+                }
+
+                $attrValues['cat'] .= '' . $value . ',';
+                //$filter .= 'cat\\' . $value . '|';
             } else {
+                $azonexp = explode('_', mb_strtolower(trim($key)));
+                $selectedAttribute = (array)DB::selectOne("SELECT * FROM attributes
+                                                                WHERE LOWER(azon)=LOWER(:azon);", ['azon' => mb_strtolower(trim($azonexp[0]))]);
+                if (!isset($attrValues[(string)$azonexp[0]])) {
+                    $attrValues[(string)$azonexp[0]] = '';
+                }
 
-                if($selectedAttribute['type_id'] == 'number') {
-                    $filter .= $key.'\\' . $value . ',100|';
-                } else if($selectedAttribute['type_id'] == 'select') {
-                    $ertek = explode('_',$value);
-                    $filter .= $key.'\\' . $ertek[1] . '|';
+                if ($selectedAttribute['type_id'] == 'number') {
+                    $attrValues[(string)$azonexp[0]] .= '0,' . $value . ',';
+                    //$filter .= $key.'\\0,' . $value . '|';
+                } else if ($selectedAttribute['type_id'] == 'select') {
+                    $valueexp = explode('_', trim($value));
+                    $attrValues[(string)$azonexp[0]] .= '' . $valueexp[1] . ',';
+                    //$filter .= $key.'\\' . $ertek[1] . '|';
                 }
             }
         }
 
+        foreach($attrValues as $attributekey => $attributevalue) {
+            $filter .= $attributekey . '\\' . mb_substr($attributevalue, 0, -1) . '|';
+        }
+
+
+                /*$selectedAttributeValues = (array)DB::select("SELECT attr.id AS attrid, attr.type_id,attr.azon,av.id AS avid,av.categories_id FROM attributes AS attr
+                                                             LEFT JOIN attributes_values AS av ON av.attributes_id=attr.id 
+                                                             WHERE LOWER(attr.azon)=LOWER(:azon) AND av.categories_id=:catid
+                                                             ORDER BY attr.id;", ['azon' => mb_strtolower(trim($azonexp[0])), 'catid' => $category_id]);
+*/
+
         //var_dump(mb_substr($filter, 0, -1)); die;
 
         //levenni az uccsó karaktert.  mb_substr($string, 0, -1);
-        //'cat\3|alkoholtartalom\10,44|gyarto\1'
+        //'//cat\12|alkoholtartalom\10,56|gyarto\2,3,6|szolofajta\2,23'
         return redirect()->route('termekszures', ['filter' => mb_substr($filter, 0, -1)]);
     }
 
@@ -534,8 +562,6 @@ UNLOCK TABLES;
                                         WHERE node.lft BETWEEN parent.lft AND parent.rgt
                                         GROUP BY node.id, node.name
                                         ORDER BY node.lft;", []);
-
-        //cat\12|alkoholtartalom\10,56|gyarto\2,3,6|szolofajta\2,23
 
         $queryStringArray = explode('|',$filter);
         $category = '';
