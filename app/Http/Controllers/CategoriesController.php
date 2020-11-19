@@ -946,13 +946,16 @@ pav.attributes_values_id,pav.value AS pavvalue, attr.id AS attrid,attr.web_name 
 
     public function attributesValuesBrowser($attrid)
     {
+        $attribute = DB::selectOne("SELECT * FROM attributes WHERE id=:aid;", ['aid' => $attrid]);
+
         $attributesvalues = DB::select("SELECT * FROM attributes_values WHERE attributes_id=:aid;", ['aid' => $attrid]);
 
         $categories = DB::select("SELECT * FROM categories;", []);
 
         return view('attributesvalues', ['attributesvalues' => $attributesvalues,
             'categories' => $categories,
-            'attribute_id' => $attrid]);
+            'attribute_id' => $attrid,
+             'attrdatas' => $attribute]);
     }
 
     public function addAttributeValue(Request $request)

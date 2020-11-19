@@ -4,8 +4,7 @@
     <list default="true" id="63b514c9-3ba6-4659-823b-bcf70235db8a" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/Http/Controllers/CategoriesController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/CategoriesController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/views/categories.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/views/categories.blade.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/views/termekek.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/views/termekek.blade.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/views/attributesvalues.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/views/attributesvalues.blade.php" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -36,7 +35,7 @@
       <file leaf-file-name="AttributeValuesSeeder.php" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/database/seeds/AttributeValuesSeeder.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="17">
+            <state relative-caret-position="3230">
               <caret line="191" column="33" selection-start-line="191" selection-start-column="33" selection-end-line="191" selection-end-column="33" />
             </state>
           </provider>
@@ -45,8 +44,8 @@
       <file leaf-file-name="web.php" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/routes/web.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="289">
-              <caret line="39" column="65" selection-start-line="39" selection-start-column="52" selection-end-line="39" selection-end-column="65" />
+            <state relative-caret-position="867">
+              <caret line="52" column="89" selection-start-line="52" selection-start-column="66" selection-end-line="52" selection-end-column="89" />
             </state>
           </provider>
         </entry>
@@ -54,8 +53,17 @@
       <file leaf-file-name="CategoriesController.php" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/Http/Controllers/CategoriesController.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="311">
-              <caret line="372" column="51" selection-start-line="372" selection-start-column="51" selection-end-line="372" selection-end-column="51" />
+            <state relative-caret-position="272">
+              <caret line="975" column="35" lean-forward="true" selection-start-line="975" selection-start-column="35" selection-end-line="975" selection-end-column="35" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="attributesvalues.blade.php" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/resources/views/attributesvalues.blade.php">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1734">
+              <caret line="102" selection-start-line="102" selection-end-line="102" />
             </state>
           </provider>
         </entry>
@@ -63,11 +71,8 @@
       <file leaf-file-name="categories.blade.php" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/resources/views/categories.blade.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="221">
+            <state relative-caret-position="1938">
               <caret line="114" column="70" selection-start-line="114" selection-start-column="57" selection-end-line="114" selection-end-column="70" />
-              <folding>
-                <element signature="n#style#0;n#span#0;n#!!top" expanded="true" />
-              </folding>
             </state>
           </provider>
         </entry>
@@ -75,11 +80,8 @@
       <file leaf-file-name="termekek.blade.php" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/resources/views/termekek.blade.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="221">
+            <state relative-caret-position="1972">
               <caret line="116" column="55" selection-start-line="116" selection-start-column="55" selection-end-line="116" selection-end-column="55" />
-              <folding>
-                <element signature="n#style#0;n#span#0;n#!!top" expanded="true" />
-              </folding>
             </state>
           </provider>
         </entry>
@@ -87,7 +89,7 @@
       <file leaf-file-name="ProductController.php" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/Http/Controllers/ProductController.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="62">
+            <state relative-caret-position="833">
               <caret line="52" selection-start-line="52" selection-end-line="52" />
             </state>
           </provider>
@@ -123,12 +125,12 @@
       <find>removeNode</find>
       <find>electr</find>
       <find>termekek</find>
-      <find>attributesValuesBrowser</find>
       <find>implo</find>
       <find>getTermekek</find>
       <find>termekeloszures</find>
       <find>getEloSzurtTermekek</find>
       <find>index(</find>
+      <find>attributesValuesBrowser</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -173,7 +175,6 @@
         <option value="$PROJECT_DIR$/resources/views/editcategories.blade.php" />
         <option value="$PROJECT_DIR$/resources/views/home.blade.php" />
         <option value="$PROJECT_DIR$/resources/views/attributes.blade.php" />
-        <option value="$PROJECT_DIR$/resources/views/attributesvalues.blade.php" />
         <option value="$PROJECT_DIR$/resources/views/categoriesattributes.blade.php" />
         <option value="$PROJECT_DIR$/resources/views/termek.blade.php" />
         <option value="$PROJECT_DIR$/resources/views/product.blade.php" />
@@ -181,6 +182,7 @@
         <option value="$PROJECT_DIR$/routes/web.php" />
         <option value="$PROJECT_DIR$/resources/views/termekek.blade.php" />
         <option value="$PROJECT_DIR$/resources/views/categories.blade.php" />
+        <option value="$PROJECT_DIR$/resources/views/attributesvalues.blade.php" />
         <option value="$PROJECT_DIR$/app/Http/Controllers/CategoriesController.php" />
       </list>
     </option>
@@ -497,7 +499,9 @@
       <workItem from="1601120658392" duration="6216000" />
       <workItem from="1601307645082" duration="10503000" />
       <workItem from="1601389100361" duration="14789000" />
-      <workItem from="1601564121968" duration="12619000" />
+      <workItem from="1601564121968" duration="13236000" />
+      <workItem from="1601663979063" duration="2074000" />
+      <workItem from="1602010710514" duration="647000" />
     </task>
     <task id="LOCAL-00001" summary="third">
       <created>1598818906141</created>
@@ -583,17 +587,23 @@
       <option name="project" value="LOCAL" />
       <updated>1601411182603</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="categories nested set">
+      <created>1601580662920</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1601580662920</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="195810000" />
+    <option name="totallyTimeSpent" value="199148000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.35973155" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.3704698" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
@@ -913,13 +923,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/resources/views/attributesvalues.blade.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="92" column="58" selection-start-line="92" selection-start-column="58" selection-end-line="92" selection-end-column="58" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/resources/views/categoriesattributes.blade.php">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1887">
@@ -950,49 +953,50 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/Http/Controllers/ProductController.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="62">
+        <state relative-caret-position="833">
           <caret line="52" selection-start-line="52" selection-end-line="52" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/resources/views/termekek.blade.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="221">
+        <state relative-caret-position="1972">
           <caret line="116" column="55" selection-start-line="116" selection-start-column="55" selection-end-line="116" selection-end-column="55" />
-          <folding>
-            <element signature="n#style#0;n#span#0;n#!!top" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/resources/views/categories.blade.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="221">
+        <state relative-caret-position="1938">
           <caret line="114" column="70" selection-start-line="114" selection-start-column="57" selection-end-line="114" selection-end-column="70" />
-          <folding>
-            <element signature="n#style#0;n#span#0;n#!!top" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/database/seeds/AttributeValuesSeeder.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
+        <state relative-caret-position="3230">
           <caret line="191" column="33" selection-start-line="191" selection-start-column="33" selection-end-line="191" selection-end-column="33" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/routes/web.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="39" column="65" selection-start-line="39" selection-start-column="52" selection-end-line="39" selection-end-column="65" />
+        <state relative-caret-position="867">
+          <caret line="52" column="89" selection-start-line="52" selection-start-column="66" selection-end-line="52" selection-end-column="89" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/resources/views/attributesvalues.blade.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1734">
+          <caret line="102" selection-start-line="102" selection-end-line="102" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/Http/Controllers/CategoriesController.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="311">
-          <caret line="372" column="51" selection-start-line="372" selection-start-column="51" selection-end-line="372" selection-end-column="51" />
+        <state relative-caret-position="272">
+          <caret line="975" column="35" lean-forward="true" selection-start-line="975" selection-start-column="35" selection-end-line="975" selection-end-column="35" />
         </state>
       </provider>
     </entry>

@@ -90,7 +90,7 @@
     @endif
 
     <div class="content" style="text-align: left;">
-        <span style="font-weight: bold;">ATTRIBUTES VALUES</span><br>
+        <span style="font-weight: bold;">ATTRIBUTES VALUES (<?php echo $attrdatas->web_name?>)</span><br>
         <br>
 
         <?php
